@@ -102,8 +102,26 @@ public class NumberSpellerTest {
                 equalTo("Seven million six hundred fifty four thousand three hundred and twenty one"));
     }
     @Test
+    public void test600(){
+        assertThat(numberSpeller.spell(600L), equalTo("Six hundred"));
+    }
+
+    @Test
+    public void negative850(){
+        assertThat(numberSpeller.spell(-850L), equalTo("Negative eight hundred and fifty"));
+    }
+
+    @Test
+    public void negative42(){
+        assertThat(numberSpeller.spell(-42L), equalTo("Negative forty two"));
+    }
+
+    @Test
     public void testVeryLarge(){
         assertThat(numberSpeller.spell(Long.MAX_VALUE), equalTo("Nine quintillion two hundred twenty three quadrillion three hundred seventy two trillion thirty six billion eight hundred fifty four million seven hundred seventy five thousand eight hundred and seven"));
     }
-
+    @Test
+    public void testNegativeLarge(){
+        assertThat(numberSpeller.spell(Long.MIN_VALUE), equalTo("Negative nine quintillion two hundred twenty three quadrillion three hundred seventy two trillion thirty six billion eight hundred fifty four million seven hundred seventy five thousand eight hundred and eight"));
+    }
 }

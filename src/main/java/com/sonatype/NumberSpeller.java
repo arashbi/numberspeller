@@ -8,6 +8,11 @@ import java.util.List;
  * Simple class to spell a long number expressed in digits. It adds an end before the tends.
  * For example 111 is spelled One hundred and eleven.
  * Class is thread safe, carries no state.
+ *
+ * @ImpleNote We use a {@link java.lang.StringBuilder} to put together the result. This if for efficiency reasons to save us from creating many strings,
+ *            but it come with a complexity in code. Depending on the performance requirement, it might be better to use simple strings,
+ *            in a future refactoring. This will make dealing with whitespaces and 'and' simpler
+ *
  * Created by Arash on 2019-03-22.
  */
 
@@ -18,21 +23,34 @@ public class NumberSpeller {
         if(number == 0) {
             return "Zero";
         }
+        //cannot handle MIN_VALUE directly as we cannot change it to a positive number(MIN_VALUE * -1 == MIN_VALUE)
+        if(number == Long.MIN_VALUE) {
+            return "Negative nine quintillion two hundred twenty three quadrillion three hundred seventy two trillion thirty six billion eight hundred fifty four million seven hundred seventy five thousand eight hundred and eight";
+        }
+        StringBuilder accumulator = new StringBuilder();
+        boolean isMinus = false;
+        if( number < 0  ){
+            isMinus = true;
+            number = -1 * number;
+        }
 
         List<Integer> sections = calcSections(number);
-        StringBuilder accumulator = new StringBuilder();
+
         for (int i = sections.size() -1 ; i >= 0 ; i--) {
             spellParts(sections.get(i), i, accumulator);
         }
-        return capitalizeFirstLetter(accumulator.toString());
+        if (isMinus) {
+            accumulator.insert(0, "negative ");
+        }
+        return capitalizeFirstLetter(accumulator.toString().trim());
     }
 
     private void spellParts(int number, int section, StringBuilder accumulator) {
         if (number == 0 ) return;
         readHundreds(number, section == 0, accumulator);
-        if(section == 0 ) return;;
+        if(section == 0 ) return;
         accumulator.append(' ').append(SpellingConstants.sections[section])
-                .append( " ");
+                .append( ' ');
 
     }
 
@@ -44,10 +62,16 @@ public class NumberSpeller {
             spellDouble(hundreds, accumulator);
             accumulator.append( " hundred ");
         }
+        int rest = threeDigitNumber % 100;
+
+        //we don't want to append space or "and"
+        if( rest == 0 ){
+            return;
+        }
         if( addAnd && !accumulator.toString().isEmpty()) {
             accumulator.append("and ");
         }
-        spellDouble(threeDigitNumber % 100, accumulator);
+        spellDouble(rest, accumulator);
 
     }
 
@@ -60,9 +84,12 @@ public class NumberSpeller {
         if(doubleDigit < 20){
             accumulator.append(SpellingConstants.underTwenty[doubleDigit]);
         } else {
-            accumulator.append(SpellingConstants.tens[doubleDigit /10])
-                    .append(' ');
-            spellSingles(doubleDigit%10, accumulator);
+            accumulator.append(SpellingConstants.tens[doubleDigit /10]);
+            int rest = doubleDigit%10;
+            if(rest != 0) {
+                accumulator.append(' ');
+                spellSingles(rest, accumulator);
+            }
 
         }
     }
