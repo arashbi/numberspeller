@@ -16,10 +16,11 @@ public class Repl {
         PrintStream out = System.out;
         out.println("enter a number in digits. Ctrl+C to exit");
         out.print("numberspeller>");
+        try( BufferedReader inputReader = new BufferedReader(
+                new InputStreamReader(System.in)
+        )) {
         while(true) {
-            try( BufferedReader inputReader = new BufferedReader(
-                    new InputStreamReader(System.in)
-            )) {
+
                 String input = inputReader.readLine();
                 try{
                     long number = Long.valueOf(input);
@@ -29,10 +30,9 @@ public class Repl {
                 }
 
                 out.print("numberspeller>");
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
     }
 }
